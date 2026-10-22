@@ -1,0 +1,64 @@
+# gold-watch 配置示例
+# 复制为 config.toml 后修改。TOML 语法，字符串用双引号。
+# 密钥不要写在这里，放到同目录的 .env（见 .env.example）。
+
+[app]
+# 所有时间按这个时区解释
+timezone = "Asia/Shanghai"
+# 相对路径以本配置文件所在目录为基准
+state_file = "state.json"
+log_file = "logs/gold-watch.log"
+
+[source]
+# goldapi: 国际现货 XAU/USD（USD/oz，免密钥，更新快）
+# sge:     上海黄金交易所 Au99.99（CNY/g）
+# comex:   COMEX 黄金（USD/oz）
+provider = "goldapi"
+fallbacks = ["sge"]
+
+[fx]
+# 规则单位与行情单位不同时，用来换算 USD/CNY
+# sina: 新浪在岸汇率 | frankfurter: 欧洲央行日更 | erapi: open.er-api 日更 | fixed: 固定值
+provider = "sina"
+fallbacks = ["frankfurter"]
+# provider = "fixed" 时启用：
+# fixed_rate = 7.10
+
+[push]
+# serverchan | pushplus | wxpusher | wecom | console
+# 个人微信推荐 serverchan（Server酱）或 pushplus；企业微信群用 wecom。
+provider = "serverchan"
+title_prefix = "金价提醒"
+# 仅 wxpusher 需要（也可用环境变量 WXPUSHER_UID）：
+# uids = ["${WXPUSHER_UID}"]
+
+[schedule]
+# 每天检查的时间，可写多个
+daily_at = ["09:30"]
+# 想盘中每 30 分钟检查一次时，把下面改成 30，并按需设置 active_hours
+interval_minutes = 0
+# active_hours = ["08:00", "23:00"]
+# 只在周一到周五检查（周末金市休市）
+weekdays_only = false
+# 即使没有触发任何规则，也在每个检查点发一条金价日报
+daily_report = false
+
+# 规则：direction = "below" 表示价格 ≤ price 时提醒；"above" 表示 ≥ price。
+# repeat_hours：价格持续满足时，每隔多久再提醒一次；0 = 只在穿越阈值时提醒。
+# cooldown_hours：同一规则两次提醒的最小间隔。
+
+[[rules]]
+name = "国内金价跌破 870"
+direction = "below"
+price = 870
+unit = "CNY/g"
+repeat_hours = 24
+cooldown_hours = 2
+
+[[rules]]
+name = "国际金价突破 4200"
+direction = "above"
+price = 4200
+unit = "USD/oz"
+repeat_hours = 0
+cooldown_hours = 2

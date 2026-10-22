@@ -1,0 +1,10 @@
+.env
+config.toml
+state.json
+state.json.lock
+logs/
+__pycache__/
+*.pyc
+.run/
+.DS_Store
+*.swp
